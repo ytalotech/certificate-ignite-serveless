@@ -51,7 +51,8 @@ const serverlessConfiguration: AWS = {
         Properties: {
           TableName: "users_certificate",
           ProvisionedThroughput: {
-
+            ReadCapacityUnits: 5,
+            WriteCapacityUnits: 5
           },
           AtributeDefinitions: [
             {
