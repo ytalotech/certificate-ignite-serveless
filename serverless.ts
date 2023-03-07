@@ -43,6 +43,14 @@ const serverlessConfiguration: AWS = {
       platform: 'node',
       concurrency: 10,
     },
+    dynamodb: {
+      stages: ["dev", "local"],
+      start: {
+        port: 8000,
+        inMemory: true,
+        migrate: true
+      },
+    },
   },
   resources: {
     Resources: {
@@ -54,7 +62,7 @@ const serverlessConfiguration: AWS = {
             ReadCapacityUnits: 5,
             WriteCapacityUnits: 5
           },
-          AtributeDefinitions: [
+          AttributeDefinitions: [
             {
               AttributeName: "id",              
               AttributeType: "S"              
@@ -63,7 +71,7 @@ const serverlessConfiguration: AWS = {
           KeySchema: [
             {
               AttributeName: "id",
-              keyType: "HASH",
+              KeyType: "HASH",
             }
           ]
         }
