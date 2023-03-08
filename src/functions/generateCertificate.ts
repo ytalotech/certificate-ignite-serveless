@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { join } from "path";
 import { readFileSync } from "fs";
 import chromium from "chrome-aws-lambda";
+import { S3 } from "aws-sdk";
 
 interface ICreateCertificate {
     id: string;
@@ -43,18 +44,22 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         })
         .promise();
 
-    // Para inserir informações na tabela
-    await document
-        .put({
-            TableName: 'users_certificate',
-            Item: {
-                id,
-                name,
-                grade,
-                created_at: new Date().getTime(),
-            }
-        })
-        .promise();
+    const userAlreadyExists = response.Items[0]
+
+    if (!userAlreadyExists) {
+        // Para inserir informações na tabela
+        await document
+            .put({
+                TableName: 'users_certificate',
+                Item: {
+                    id,
+                    name,
+                    grade,
+                    created_at: new Date().getTime(),
+                }
+            })
+            .promise();
+    }
 
     // Pega o path do selo
     const medalPath = join(process.cwd(), "src", "templates", "selo.png");
@@ -90,8 +95,29 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     await browser.close();
 
+    const s3 = new S3();
+
+    // await s3
+    //     .createBucket({
+    //         Bucket: "nome_bucket"
+    //     })
+    //     .promise();
+
+    await s3
+        .putObject({
+            Bucket: "nome_bucket",
+            Key: `${id}.pdf`,
+            ACL: "public-read",
+            Body: pdf,
+            ContentType: "application/pdf"
+        })
+        .promise();
+
     return {
         statusCode: 201,
-        body: JSON.stringify(response.Items[0])
+        body: JSON.stringify({
+            message: "Certificado criado com sucesso!",
+            url: `https://nome_bucket.s3.amazonaws.com/${id}.pdf`,
+        })
     }
 }
