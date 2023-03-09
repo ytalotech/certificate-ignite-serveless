@@ -8,6 +8,7 @@ const serverlessConfiguration: AWS = {
     name: 'aws',
     runtime: 'nodejs14.x',
     region: "us-east-1",
+    timeout: 10,
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -30,6 +31,7 @@ const serverlessConfiguration: AWS = {
       },
     ]
   },
+  package: { individually: false, include: ["./src/templates/**"] },
   // import the function via paths
   functions: {
     generateCertificate: {
@@ -57,7 +59,6 @@ const serverlessConfiguration: AWS = {
       ],
     }
   },
-  package: { individually: true },
   custom: {
     esbuild: {
       bundle: true,
